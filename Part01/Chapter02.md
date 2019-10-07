@@ -116,8 +116,7 @@
 		- RAID5를 확장
 		- 이중 패리티 사용(무정지성)
 		- 최소 4개 드라이브 필요
-- 비슷한 레벨끼리 비교해보면 아래와 같다.
-	- RAID 0 vs RAID 1  
+- 비슷한 레벨끼리 비교해보면 다음과 같다.  
 
 |구분|RAID 0|RAID 1|
 |:---:|:---:|:---:|
@@ -125,7 +124,6 @@
 |안정성(결합)|낮음|높음(허용)|
 |공간효율|좋음|낮음|
 
-	- RAID 5 vs RAID 6 
 |구분|RAID 5|RAID 6|
 |:---:|:---:|:---:|
 |Parity|단일|이중|
@@ -134,9 +132,223 @@
 
 
 ## 파티션 분할
+fdisk는 파티션 테이블을 관리하는 명령어로 리눅스의 디스크 파티션을 생성, 수정, 삭제할 수 있는 일종의 유틸리티이다. 실제 명령어를 사용하기 위해 `--help` 옵션을 주면 아래와 같이 명령어에 대한 간략한 사용법이 나온다.
+``` bash
+root@goorm:/workspace/g0pher# fdisk --help
+
+Usage:
+ fdisk [options] <disk>      change partition table
+ fdisk [options] -l [<disk>] list partition table(s)
+
+Display or manipulate a disk partition table.
+
+Options:
+ -b, --sector-size <size>      physical and logical sector size
+ -B, --protect-boot            don't erase bootbits when creating a new label
+ -c, --compatibility[=<mode>]  mode is 'dos' or 'nondos' (default)
+ -L, --color[=<when>]          colorize output (auto, always or never)
+                                 colors are enabled by default
+ -l, --list                    display partitions and exit
+ -o, --output <list>           output columns
+ -t, --type <type>             recognize specified partition table type only
+ -u, --units[=<unit>]          display units: 'cylinders' or 'sectors' (default)
+ -s, --getsz                   display device size in 512-byte sectors [DEPRECATED]
+     --bytes                   print SIZE in bytes rather than in human readable format
+ -w, --wipe <mode>             wipe signatures (auto, always or never)
+ -W, --wipe-partitions <mode>  wipe signatures from new partitions (auto, always or never)
+
+ -C, --cylinders <number>      specify the number of cylinders
+ -H, --heads <number>          specify the number of heads
+ -S, --sectors <number>        specify the number of sectors per track
+
+ -h, --help                    display this help
+ -V, --version                 display version
+
+Available output columns:
+ gpt: Device Start End Sectors Size Type Type-UUID Attrs Name UUID
+ dos: Device Start End Sectors Cylinders Size Type Id Attrs Boot End-C/H/S Start-C/H/S
+ bsd: Slice Start End Sectors Cylinders Size Type Bsize Cpg Fsize
+ sgi: Device Start End Sectors Cylinders Size Type Id Attrs
+ sun: Device Start End Sectors Cylinders Size Type Id Flags
+
+For more details see fdisk(8).
+```
+### `-l`  
+파티션 목록을 나열하는 옵션
+	
+```bash
+root@raspberrypi:~# fdisk -l
+Disk /dev/mmcblk0: 7.4 GiB, 7948206080 bytes, 15523840 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xaeda73da
+
+Device         Boot Start      End  Sectors  Size Id Type
+/dev/mmcblk0p1       8192    96663    88472 43.2M  c W95 FAT32 (LBA)
+/dev/mmcblk0p2      98304 15523839 15425536  7.4G 83 Linux
+```
+### `디스크 선택`
+```bash
+root@raspberrypi:~# fdisk /dev/mmcblk0p2
+
+Welcome to fdisk (util-linux 2.29.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Device /dev/mmcblk0p2 already contains a ext4 signature.
+The signature will be removed by a write command.
+
+Device does not contain a recognized partition table.
+Created a new DOS disklabel with disk identifier 0x2af488f8.
+
+Command (m for help): 
+```
+디스크를 선택하게 되면 위와같이 fdisk 프로그램 내에서 커맨드를 입력받는다. `m`을 입력해서 사용법을 보면 아래와 같다.
+```bash
+Command (m for help): m
+
+Help:
+
+  DOS (MBR)
+   a   toggle a bootable flag
+   b   edit nested BSD disklabel
+   c   toggle the dos compatibility flag
+
+  Generic
+   d   delete a partition
+   F   list free unpartitioned space
+   l   list known partition types
+   n   add a new partition
+   p   print the partition table
+   t   change a partition type
+   v   verify the partition table
+   i   print information about a partition
+
+  Misc
+   m   print this menu
+   u   change display/entry units
+   x   extra functionality (experts only)
+
+  Script
+   I   load disk layout from sfdisk script file
+   O   dump disk layout to sfdisk script file
+
+  Save & Exit
+   w   write table to disk and exit
+   q   quit without saving changes
+
+  Create a new label
+   g   create a new empty GPT partition table
+   G   create a new empty SGI (IRIX) partition table
+   o   create a new empty DOS partition table
+   s   create a new empty Sun partition table
+```
+간단한 명령어들만 실행시켜보면 아래와 같다.
+```bash
+root@raspberrypi:~# fdisk /dev/mmcblk0
+
+Welcome to fdisk (util-linux 2.29.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
 
 
+Command (m for help): p
+Disk /dev/mmcblk0: 7.4 GiB, 7948206080 bytes, 15523840 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xaeda73da
 
+Device         Boot Start      End  Sectors  Size Id Type
+/dev/mmcblk0p1       8192    96663    88472 43.2M  c W95 FAT32 (LBA)
+/dev/mmcblk0p2      98304 15523839 15425536  7.4G 83 Linux
+
+Command (m for help): l
+
+ 0  Empty           24  NEC DOS         81  Minix / old Lin bf  Solaris        
+ 1  FAT12           27  Hidden NTFS Win 82  Linux swap / So c1  DRDOS/sec (FAT-
+ 2  XENIX root      39  Plan 9          83  Linux           c4  DRDOS/sec (FAT-
+ 3  XENIX usr       3c  PartitionMagic  84  OS/2 hidden or  c6  DRDOS/sec (FAT-
+ 4  FAT16 <32M      40  Venix 80286     85  Linux extended  c7  Syrinx         
+ 5  Extended        41  PPC PReP Boot   86  NTFS volume set da  Non-FS data    
+ 6  FAT16           42  SFS             87  NTFS volume set db  CP/M / CTOS / .
+ 7  HPFS/NTFS/exFAT 4d  QNX4.x          88  Linux plaintext de  Dell Utility   
+ 8  AIX             4e  QNX4.x 2nd part 8e  Linux LVM       df  BootIt         
+ 9  AIX bootable    4f  QNX4.x 3rd part 93  Amoeba          e1  DOS access     
+ a  OS/2 Boot Manag 50  OnTrack DM      94  Amoeba BBT      e3  DOS R/O        
+ b  W95 FAT32       51  OnTrack DM6 Aux 9f  BSD/OS          e4  SpeedStor      
+ c  W95 FAT32 (LBA) 52  CP/M            a0  IBM Thinkpad hi ea  Rufus alignment
+ e  W95 FAT16 (LBA) 53  OnTrack DM6 Aux a5  FreeBSD         eb  BeOS fs        
+ f  W95 Ext'd (LBA) 54  OnTrackDM6      a6  OpenBSD         ee  GPT            
+10  OPUS            55  EZ-Drive        a7  NeXTSTEP        ef  EFI (FAT-12/16/
+11  Hidden FAT12    56  Golden Bow      a8  Darwin UFS      f0  Linux/PA-RISC b
+12  Compaq diagnost 5c  Priam Edisk     a9  NetBSD          f1  SpeedStor      
+14  Hidden FAT16 <3 61  SpeedStor       ab  Darwin boot     f4  SpeedStor      
+16  Hidden FAT16    63  GNU HURD or Sys af  HFS / HFS+      f2  DOS secondary  
+17  Hidden HPFS/NTF 64  Novell Netware  b7  BSDI fs         fb  VMware VMFS    
+18  AST SmartSleep  65  Novell Netware  b8  BSDI swap       fc  VMware VMKCORE 
+1b  Hidden W95 FAT3 70  DiskSecure Mult bb  Boot Wizard hid fd  Linux raid auto
+1c  Hidden W95 FAT3 75  PC/IX           bc  Acronis FAT32 L fe  LANstep        
+1e  Hidden W95 FAT1 80  Old Minix       be  Solaris boot    ff  BBT            
+
+Command (m for help): q
+```
+|명령|설명|
+|:--:|:--:|
+|n|새로운 파티션을 추가하는 명령|
+|t|파티션 타입을 변경하는 명령|
+|p|파티션 테이블을 출력하는 명령|
+|F|잘 알려진 파티션 타입 리스트를 알려주는 명령|
+|q|커맨드 입력 상태 종료|
+
+
+## 리눅스 부팅 과정
+리눅스의 부팅 과정은 아래와 같다.
+1. 전원 켜짐
+2. ROM-BIOS 실행
+	- ROM-BIOS를 실행하여 POST와 부트로더를 로딩한다.
+	- POST(Power On Self Test)  
+		시스템에 장착되어있는 하드웨어들이 정상적으로 돌아가는지 이상 유무를 체크한다.
+3. 부트로더 실행
+	- 부트로더를 실행하여 커널로드와 스와퍼 프로세스를 호출한다.
+	- 리눅스 부트로더를 통해 커널을 로딩하고 커널을 선택하여 메모리가 로드되는 순간부터 부팅이 진행된다.
+4. 스와퍼 프로세스 수행
+	- 커널로드에서 인식했던 장치들의 드라이브를 초기화 하는 스와퍼 프로세스를 수행한다.
+5. init 프로세스 실행
+	- init 프로세스를 실행하여 `/etc/inittab`을 읽어들인다.
+6. 부팅 레벨 결정
+	- 부팅 레벨을 결정한다.
+7. rc.sysinit 스크립트 실행
+	- `/etc/rc.d/rc.sysinit` 스크립트를 실행하여 시스템 초기화 작업을 수행한다.
+8. rcX.d 스크립트 실행
+	- `/etc/rc.d/rcX.d` 스크립트가 실행되어 부팅 레벨에 대해 디렉터리 내 스크립트를 순차적으로 실행한다.
+9. X 윈도우 실행
+	- 부팅 레벨이 5인 경우 GUI로 X윈도우를 실행한다.
+
+## 부트로더(Bootloader)
+- 부트스트랩 로더(Bootstrap Loader)의 준말로 컴퓨터를 사용자가 사용할 수 있도록 디스크에 존재하는 OS 데이터를 읽어서 주기억장치에 적재(복사)해주는 프로그램이다.
+- 부트로더는 운영체제가 실행되기 전에 부팅하기 위해 필요한 모든 작업(환경설정, 오류검출, 초기화 등)을 끝내고 마지막에 OS를 실행시킨다.
+- 임베디드 시스템 부트로더는 OS를 호출하고 BIOS 기능을 하는 프로그램으로, 부팅시 가장 먼저 수행된다.
+- 부트로더는 하드디스크의 첫번째 섹터인 MBR(Master Boot Record)에 512바이트 크기로 위치해있다.
+- MBR에는 부르로더와 파티션 정보를 저장한다.
+- 주 파티션 마다 부트 섹터가 할당된다.
+- x86 아키텍처에서 많이 사용되는 부트로더는 LILO(LInux LOader)와 GRUB(GRand Unified Bootloader)이다.
+	- LILO는 리눅스 한정 부트로더다.
+	- GRUB는 여러 운영체제에서 사용 가능하다.
+	- ROM-BIOS는 MBR에 있는 부트로더에게 제어권을 넘긴다.
+	- GRUB
+		- LILO의 단점을 보완한 부트로더다.
+		- 리눅스의 전통적인 부트로더로 사용되어왔다.
+		- LILO에 비해 설정과 사용이 편리하다.
+		- 부팅 정보를 사용자가 임의로 수정하여 부팅할 수 있어서 부팅 정보가 잘못되어도 사용자가 부팅 과정에서 수정해서 부팅할 수 있다.
+		- 여러 운영체제와 멀티부팅할 수 있다.
+		- 대화형 설정이라 커널의 경로와 파일 이름만 알면 부팅할 수 있다.
+		- 메뉴 인터페이스를 지원한다.
+
+## 런레벨(run level)
 
 
 
