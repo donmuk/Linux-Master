@@ -89,6 +89,4 @@ root@goorm:/workspace/g0pher#
 ```
 위와 같이 환경변수를 등록하고, 수정하고, 삭제할 수 있다.
 
-## man
-
-
+## s
