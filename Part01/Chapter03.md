@@ -89,4 +89,96 @@ root@goorm:/workspace/g0pher#
 ```
 위와 같이 환경변수를 등록하고, 수정하고, 삭제할 수 있다.
 
-## s
+## useradd & passwd & su
+useradd는 사용자를 추가하는 명령으로, 사용법은 아래와 같다.
+```bash
+root@goorm:/workspace/g0pher/git/linux-master/Part01(master)# useradd --help
+Usage: useradd [options] LOGIN
+       useradd -D
+       useradd -D [options]
+
+Options:
+  -b, --base-dir BASE_DIR       base directory for the home directory of the
+                                new account
+  -c, --comment COMMENT         GECOS field of the new account
+  -d, --home-dir HOME_DIR       home directory of the new account
+  -D, --defaults                print or change default useradd configuration
+  -e, --expiredate EXPIRE_DATE  expiration date of the new account
+  -f, --inactive INACTIVE       password inactivity period of the new account
+  -g, --gid GROUP               name or ID of the primary group of the new
+                                account
+  -G, --groups GROUPS           list of supplementary groups of the new
+                                account
+  -h, --help                    display this help message and exit
+  -k, --skel SKEL_DIR           use this alternative skeleton directory
+  -K, --key KEY=VALUE           override /etc/login.defs defaults
+  -l, --no-log-init             do not add the user to the lastlog and
+                                faillog databases
+  -m, --create-home             create the user's home directory
+  -M, --no-create-home          do not create the user's home directory
+  -N, --no-user-group           do not create a group with the same name as
+                                the user
+  -o, --non-unique              allow to create users with duplicate
+                                (non-unique) UID
+  -p, --password PASSWORD       encrypted password of the new account
+  -r, --system                  create a system account
+  -R, --root CHROOT_DIR         directory to chroot into
+  -s, --shell SHELL             login shell of the new account
+  -u, --uid UID                 user ID of the new account
+  -U, --user-group              create a group with the same name as the user
+  -Z, --selinux-user SEUSER     use a specific SEUSER for the SELinux user mapping
+      --extrausers              Use the extra users database
+```
+우선 아래와 같이 사용자 목록을 확인할 수 있다.
+```bash
+root@goorm:/workspace/g0pher# cat /etc/passwd
+root:x:0:0:root:/root:/usr/bin/zsh
+```
+`/etc/passwd`에서 사용자를 확인할 수 있다. 현재 root가 있는데 `g0pher`라는 사용자를 추가해보자.
+
+```bash
+root@goorm:/workspace/g0pher# cat /etc/passwd
+root:x:0:0:root:/root:/usr/bin/zsh
+g0pher:x:1000:1000::/home/g0pher:/bin/bash
+```
+위와 같이 useradd 명령으로 사용자를 추가할 수 있다. 추가된 사용자는 passwd 명령으로 비밀번호를 변경할 수 있다. 사용법은 다음과 같다.
+```bash
+root@goorm:/workspace/g0pher/git/linux-master/Part01(master)# passwd --help
+Usage: passwd [options] [LOGIN]
+
+Options:
+  -a, --all                     report password status on all accounts
+  -d, --delete                  delete the password for the named account
+  -e, --expire                  force expire the password for the named account
+  -h, --help                    display this help message and exit
+  -k, --keep-tokens             change password only if expired
+  -i, --inactive INACTIVE       set password inactive after expiration
+                                to INACTIVE
+  -l, --lock                    lock the password of the named account
+  -n, --mindays MIN_DAYS        set minimum number of days before password
+                                change to MIN_DAYS
+  -q, --quiet                   quiet mode
+  -r, --repository REPOSITORY   change password in REPOSITORY repository
+  -R, --root CHROOT_DIR         directory to chroot into
+  -S, --status                  report password status on the named account
+  -u, --unlock                  unlock the password of the named account
+  -w, --warndays WARN_DAYS      set expiration warning days to WARN_DAYS
+  -x, --maxdays MAX_DAYS        set maximum number of days before password
+                                change to MAX_DAYS
+```
+다음과 같이 특정 유저의 비밀번호나, 본인의 비밀번호를 변경할 수 있다.
+``` bash
+root@goorm:/workspace/g0pher/git/linux-master/Part01(master)# passwd -S g0pher
+g0pher L 10/15/2019 0 99999 7 -1
+root@goorm:/workspace/g0pher/git/linux-master/Part01(master)# passwd g0pher
+새 UNIX 암호 입력:
+새 UNIX 암호 재입력:
+passwd: password updated successfully
+root@goorm:/workspace/g0pher/git/linux-master/Part01(master)# passwd -S g0pher
+g0pher P 10/15/2019 0 99999 7 -1
+```
+위와 같이 status가 L에서 P로 바뀐것을 확인할 수 있다.
+
+
+
+
